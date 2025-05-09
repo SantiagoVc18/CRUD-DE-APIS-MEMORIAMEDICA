@@ -1,5 +1,6 @@
 SantiagoVc18: documentame este codigo de manera sencilla
 
+
 GitHub Copilot: ### Documentación del Código
 
 Este código es una aplicación backend desarrollada con **Node.js** y **Express.js** para gestionar un sistema médico. A continuación, se describe cada sección del código:
