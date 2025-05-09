@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+    <link rel="stylesheet" href="assets/css/login.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-left">
+            <h1>Bienvenido a Memoria Médica</h1>
+            <p>Tu plataforma integral para la gestión y seguimiento de historias clínicas. Accede a tu cuenta para comenzar.</p>
+        </div>
+        <div class="login-right">
+            <div class="login-form">
+                <div class="logo-container">
+                    <img src="assets/img/Imagen logo.jpg" alt="Logo Memoria Médica">
+                </div>
+                <h2>Iniciar Sesión</h2>
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <input type="text" id="username" name="username" class="form-control" 
+                               placeholder="Usuario" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" id="password" name="password" class="form-control" 
+                               placeholder="Contraseña" required>
+                    </div>
+                    <div class="form-check text-start mb-3">
+                        <input class="form-check-input" type="checkbox" id="rememberMe">
+                        <label class="form-check-label" for="rememberMe">Recordar mi sesión</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Ingresar
+                    </button>
+                    
+                    <div class="links-container">
+                        <a href="registro.html" class="text-link">
+                            <i class="bi bi-person-plus me-2"></i>Registrar Paciente
+                        </a>
+                        <a href="index.html" class="text-link">
+                            <i class="bi bi-house me-2"></i>Volver al Inicio
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // hacer que el formulario de inicio de sesión funcione
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            // Obtener los valores de usuario y contraseña
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+        
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario: username, contrasena: password })
+                });
+        
+                const data = await response.json();
+        
+                if (response.ok && data.success) {
+                    localStorage.setItem('usuarioNombre', data.nombre);
+                    Swal.fire({
+                        title: "¡Inicio de sesión exitoso!",
+                        icon: "success",
+                        draggable: true
+                    }).then(() => {
+                        window.location.href = 'index.html';
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error de autenticación",
+                        text: data.message || "Usuario o contraseña incorrectos",
+                        footer: '<a href="#">¿No tienes una cuenta? Comunicarse al area de soporte</a>'
+                    });
+                }
+            } catch (error) {
+                console.error('Error al iniciar sesión:', error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Error de conexión",
+                    text: "No se pudo conectar con el servidor",
+                    footer: '<a href="#">¿Por qué tengo este problema?</a>'
+                });
+            }
+        });
+    </script>
+</body>
+</html>

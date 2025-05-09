@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico - Centro Gerontológico</title>
+    <link rel="stylesheet" href="assets/css/reporte.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    
+</head>
+
+<body>
+    <div class="reporte-container">
+        <div class="reporte-card">
+            <div class="reporte-header">
+                <h1><i class="bi bi-file-medical"></i> Diagnóstico Médico</h1>
+                <p class="subtitle">Complete el formulario para generar el reporte médico</p>
+            </div>
+
+            <form action="/guardar-reporte" method="POST" class="reporte-form">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="nombre"><i class="bi bi-person"></i> Nombre del paciente</label>
+                        <input type="text" id="nombre" name="nombre_paciente" required placeholder="Ingrese el nombre completo" />
+                    </div>
+
+                    <div class="input-group">
+                        <label for="nombre_medico"><i class="bi bi-person-badge"></i> Nombre del Médico</label>
+                        <input type="text" id="nombre_medico" name="nombre_medico" required placeholder="Ingrese el nombre del médico" />
+                    </div>
+
+                    <div class="input-group">
+                        <label for="edad"><i class="bi bi-calendar"></i> Edad</label>
+                        <input type="number" id="edad" name="edad" required placeholder="Ingrese la edad" />
+                    </div>
+
+                    <div class="input-group">
+                        <label for="identificacion"><i class="bi bi-card-text"></i> Identificación</label>
+                        <input type="text" id="identificacion" name="identificacion" required placeholder="Ingrese la identificación" />
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label for="telefono"><i class="bi bi-clipboard-pulse"></i> Problemas que presenta</label>
+                        <textarea id="telefono" name="problemas" required placeholder="Describa los problemas del paciente"></textarea>
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label for="Tratamiento"><i class="bi bi-heart-pulse"></i> Tratamiento</label>
+                        <textarea id="Tratamiento" name="tratamiento" required placeholder="Describa el tratamiento indicado"></textarea>
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label for="Detalles"><i class="bi bi-journal-text"></i> Detalles del paciente</label>
+                        <textarea id="Detalles" name="detalles" required placeholder="Ingrese detalles adicionales"></textarea>
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label for="Medicamento"><i class="bi bi-capsule"></i> Medicamentos</label>
+                        <div class="medicamentos-container">
+                            <div class="medicamento-item">
+                                <select class="form-select medicamento-select" name="medicamentos[]" required>
+                                    <option value="">Seleccione un medicamento...</option>
+                                </select>
+                                <input type="number" class="form-control cantidad-input" name="cantidades[]" min="1" placeholder="Cantidad" required>
+                                <button type="button" class="btn btn-danger btn-sm remove-medicamento" style="display: none;">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm mt-2" id="agregar-medicamento">
+                            <i class="bi bi-plus-circle"></i> Agregar otro medicamento
+                        </button>
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label for="Gravedad"><i class="bi bi-exclamation-triangle"></i> Gravedad del paciente</label>
+                        <select id="Gravedad" name="graveda_paciente" required>
+                            <option value="">Seleccione la gravedad...</option>
+                            <option value="Estable">Estable</option>
+                            <option value="Seguimiento">Seguimiento</option>
+                            <option value="Critico">Crítico</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn-guardar">
+                        <i class="bi bi-save"></i> Guardar Reporte
+                    </button>
+                    <button type="button" class="btn-imprimir" onclick="imprimirReporte()">
+                        <i class="bi bi-printer"></i> Imprimir
+                    </button>
+                    <a href="historialmedico.html" class="btn-volver">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function showSuccessMessage() {
+            Swal.fire({
+                title: '¡Éxito!',
+                text: 'El reporte se ha registrado correctamente',
+                icon: 'success',
+                confirmButtonText: 'Aceptar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "historialmedico.html";
+                }
+            });
+        }
+
+        function cargarDatosReporte() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const paciente = urlParams.get('paciente');
+            const medico = urlParams.get('medico');
+
+            if (paciente) {
+                document.getElementById('nombre').value = paciente;
+                document.getElementById('nombre').readOnly = true;
+            }
+            if (medico) {
+                document.getElementById('nombre_medico').value = medico;
+                document.getElementById('nombre_medico').readOnly = true;
+            }
+        }
+
+        function imprimirReporte() {
+            window.print();
+        }
+
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const usuario = localStorage.getItem('usuarioNombre');
+            if (!usuario) {
+                Swal.fire({
+                    title: 'Acceso denegado',
+                    text: 'Debes iniciar sesión para acceder a esta página',
+                    icon: 'warning',
+                    confirmButtonText: 'Ir al login'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "login.html";
+                    }
+                });
+            } else {
+                cargarDatosReporte();
+            }
+        });
+
+        // Función para cargar medicamentos
+        async function cargarMedicamentos() {
+            try {
+                const response = await fetch('/medicamentos');
+                const medicamentos = await response.json();
+                
+                const selects = document.querySelectorAll('.medicamento-select');
+                selects.forEach(select => {
+                    // Limpiar opciones existentes excepto la primera
+                    while (select.options.length > 1) {
+                        select.remove(1);
+                    }
+                    
+                    // Agregar medicamentos
+                    medicamentos.forEach(med => {
+                        const option = document.createElement('option');
+                        option.value = med.id;
+                        option.textContent = `${med.nombre} (Disponible: ${med.cantidad_disponible})`;
+                        select.appendChild(option);
+                    });
+                });
+            } catch (error) {
+                console.error('Error al cargar medicamentos:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudieron cargar los medicamentos',
+                    icon: 'error'
+                });
+            }
+        }
+
+
+        // Función para verificar disponibilidad
+        async function verificarDisponibilidad(medicamentoId, cantidad) {
+            try {
+                const response = await fetch(`/api/medicamentos/verificar?id=${medicamentoId}&cantidad=${cantidad}`);
+                const resultado = await response.json();
+                return resultado;
+            } catch (error) {
+                console.error('Error al verificar disponibilidad:', error);
+                return null;
+            }
+        }
+
+
+        // Función para agregar nuevo campo de medicamento
+        function agregarMedicamento() {
+            const container = document.querySelector('.medicamentos-container');
+            const template = document.querySelector('.medicamento-item').cloneNode(true);
+            
+            // Limpiar valores
+            template.querySelector('.medicamento-select').value = '';
+            template.querySelector('.cantidad-input').value = '';
+            template.querySelector('.remove-medicamento').style.display = 'block';
+            
+            container.appendChild(template);
+            cargarMedicamentos(); // Recargar opciones en el nuevo select
+        }
+
+        // Función para remover medicamento
+        function removerMedicamento(button) {
+            const container = document.querySelector('.medicamentos-container');
+            if (container.children.length > 1) {
+                button.closest('.medicamento-item').remove();
+            }
+        }
+
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // ... existing code ...
+            
+            // Cargar medicamentos al iniciar
+            cargarMedicamentos();
+            
+            // Agregar evento para nuevo medicamento
+            document.getElementById('agregar-medicamento').addEventListener('click', agregarMedicamento);
+            
+            // Agregar evento para remover medicamento
+            document.querySelector('.medicamentos-container').addEventListener('click', (e) => {
+                if (e.target.closest('.remove-medicamento')) {
+                    removerMedicamento(e.target);
+                }
+            });
+            
+            // Verificar disp
+            // onibilidad al cambiar cantidad
+            document.querySelector('.medicamentos-container').addEventListener('change', async (e) => {
+                if (e.target.classList.contains('cantidad-input')) {
+                    const medicamentoItem = e.target.closest('.medicamento-item');
+                    const medicamentoId = medicamentoItem.querySelector('.medicamento-select').value;
+                    const cantidad = e.target.value;
+                    
+                    if (medicamentoId && cantidad) {
+                        const resultado = await verificarDisponibilidad(medicamentoId, cantidad);
+                        if (resultado) {
+                            if (!resultado.disponible) {
+                                Swal.fire({
+                                    title: '¡Atención!',
+                                    text: `No hay suficiente inventario. Disponible: ${resultado.cantidad_actual}`,
+                                    icon: 'warning'
+                                });
+                                e.target.value = resultado.cantidad_actual;
+                            } else if (resultado.alerta_bajo) {
+                                Swal.fire({
+                                    title: '¡Atención!',
+                                    text: 'El inventario está por debajo del mínimo recomendado',
+                                    icon: 'warning'
+                                });
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+        // Modificar la función de envío del formulario
+        document.querySelector('.reporte-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Verificar disponibilidad de todos los medicamentos
+            const medicamentos = Array.from(document.querySelectorAll('.medicamento-item')).map(item => ({
+                id: item.querySelector('.medicamento-select').value,
+                cantidad: item.querySelector('.cantidad-input').value
+            }));
+            
+            let hayError = false;
+            
+            for (const med of medicamentos) {
+                const resultado = await verificarDisponibilidad(med.id, med.cantidad);
+                if (!resultado || !resultado.disponible) {
+                    hayError = true;
+                    Swal.fire({
+                        title: 'Error',
+                        text: `No hay suficiente inventario para el medicamento seleccionado`,
+                        icon: 'error'
+                    });
+                    break;
+                }
+            }
+            
+            if (!hayError) {
+                e.target.submit();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Historial de Citas - Centro Gerontológico</title>
+  <link rel="stylesheet" href="assets/css/HistorialMedico.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const usuario = localStorage.getItem('usuarioNombre');
+      if (!usuario) {
+        alert("Debes iniciar sesión para acceder a esta página.");
+        window.location.href = "login.html";
+      }
+    });
+  </script>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <h2>Centro Gerontológico</h2>
+    <div class="nav-links">
+      <a href="index.html" class="bi bi-house me-2">Inicio</a>
+      <a href="registroCitas.html" class="bi bi-calendar-plus me-2">Registrar Cita</a>
+      <a href="historialmedico2.html" class="bi bi-file-medical me-2">Historial Medico</a>
+    </div>
+  </div>
+
+  <!-- CONTENIDO -->
+  <div class="container">
+    <h1>Historial de Citas</h1>
+
+    <!-- BÚSQUEDA -->
+    <div class="search-bar">
+      <input type="text" id="busqueda" placeholder="Buscar nombre del paciente...">
+    </div>
+
+
+    <form id="historialForm" action="/historial" method="GET">
+      <div class="container">
+        <div class="table-container">
+          <table id="tablaHistorial">
+            <thead class="table-head">
+              <tr>
+                <th>Id</th>
+                <th>Nombre Paciente</th>
+                <th>Nombre Médico</th>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Motivo</th>
+                <th>Tipo Consulta</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="table-body">
+            </tbody>
+          </table>
+        </div>
+    </form>
+  </div>
+
+  <div class="modal" id="modalDetalle">
+    <div class="modal-content">
+      <span class="close" onclick="cerrarModal()">&times;</span>
+      <h2>Detalles de la Cita</h2>
+      <p><strong>Paciente:</strong> <span id="detallePaciente"></span></p>
+      <p><strong>Médico:</strong> <span id="detalleMedico"></span></p>
+      <p><strong>Fecha:</strong> <span id="detalleFecha"></span></p>
+      <p><strong>Hora:</strong> <span id="detalleHora"></span></p>
+      <p><strong>Motivo:</strong> <span id="detalleMotivo"></span></p>
+      <p><strong>Tipo de Consulta:</strong> <span id="detalleTipo"></span></p>
+    
+      <div style="margin-top: 20px; text-align: right;">
+        <button class="btn-reporte" onclick="generarReporte()">Realizar Reporte</button>
+      </div>
+    </div>
+  </div>
+
+
+  
+  <script>
+
+    // Renderiza la tabla con los datos del historial
+    function renderTabla(historialData) {
+      const tbody = document.querySelector('#tablaHistorial tbody');
+      tbody.innerHTML = '';
+
+      // Itera sobre los datos del historial y crea las filas de la tabla
+      historialData.forEach(item => {
+        const fila = document.createElement('tr');
+
+        const celdaId = document.createElement('td');
+        celdaId.textContent = item.ID;
+
+        const celdaNombrePaciente = document.createElement('td');
+        celdaNombrePaciente.textContent = item.NOMBRE_PACIENTE;
+
+        const celdaNombreMedico = document.createElement('td');
+        celdaNombreMedico.textContent = item.NOMBRE_MEDICO;
+
+        const celdaFecha = document.createElement('td');
+        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+        const fechaFormateada = new Date(item.FECHA).toLocaleDateString('es-ES', options);
+        celdaFecha.textContent = fechaFormateada;
+
+        const celdaHora = document.createElement('td');
+        celdaHora.textContent = item.HORA;
+
+        const celdaMotivo = document.createElement('td');
+        celdaMotivo.textContent = item.MOTIVO;
+
+        const celdaTipoConsulta = document.createElement('td');
+
+        const spanTipoConsulta = document.createElement('span');
+        spanTipoConsulta.className = 'badge virtual';
+        spanTipoConsulta.textContent = item.TIPO_CONSULTA;
+        celdaTipoConsulta.appendChild(spanTipoConsulta);
+
+        const celdaAccion = document.createElement('td');
+
+        const btnAccion = document.createElement('button');
+        btnAccion.type = 'button';
+        btnAccion.className = 'action-button';
+
+        const spanBotonAccion = document.createElement('span');
+        spanBotonAccion.className = 'button-text';
+        spanBotonAccion.textContent = 'Ver detalles';
+
+        const spanBotonAccionIcono = document.createElement('span');
+        spanBotonAccionIcono.className = 'button-icon';
+        spanBotonAccionIcono.textContent = '→';
+
+        btnAccion.appendChild(spanBotonAccion);
+        btnAccion.appendChild(spanBotonAccionIcono);
+
+        
+        // Agrega un evento al botón para mostrar el modal
+        btnAccion.onclick = () => {
+          // Establece los valores en el modal
+          document.getElementById('detallePaciente').textContent = item.NOMBRE_PACIENTE;
+          document.getElementById('detalleMedico').textContent = item.NOMBRE_MEDICO;
+          document.getElementById('detalleFecha').textContent = item.FECHA;
+          document.getElementById('detalleHora').textContent = item.HORA;
+          document.getElementById('detalleMotivo').textContent = item.MOTIVO;
+          document.getElementById('detalleTipo').textContent = item.TIPO_CONSULTA;
+
+          // Muestra el modal
+          document.getElementById('modalDetalle').style.display = 'flex';
+        };
+
+        celdaAccion.appendChild(btnAccion);
+
+        fila.appendChild(celdaId);
+        fila.appendChild(celdaNombrePaciente);
+        fila.appendChild(celdaNombreMedico);
+        fila.appendChild(celdaFecha);
+        fila.appendChild(celdaHora);
+        fila.appendChild(celdaMotivo);
+        fila.appendChild(celdaTipoConsulta);
+        fila.appendChild(celdaAccion);
+
+        tbody.appendChild(fila);
+      });
+    }
+
+    async function cargarHistorial() {
+      try {
+        const respuesta = await fetch('/historial');
+        if (!respuesta.ok) {
+          throw new Error('Error al obtener la información');
+        }
+        const data = await respuesta.json();
+        renderTabla(data);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', cargarHistorial);
+
+    
+    function verDetalles(button) {
+    document.getElementById('detallePaciente').textContent = button.dataset.paciente;
+    document.getElementById('detalleMedico').textContent = button.dataset.medico;
+    document.getElementById('detalleFecha').textContent = button.dataset.fecha;
+    document.getElementById('detalleHora').textContent = button.dataset.hora;
+    document.getElementById('detalleMotivo').textContent = button.dataset.motivo;
+    document.getElementById('detalleTipo').textContent = button.dataset.tipo;
+
+    document.getElementById('modalDetalle').style.display = 'flex';
+  }
+
+  function cerrarModal() {
+    document.getElementById('modalDetalle').style.display = 'none';
+  }
+
+  // Cierra modal al hacer clic fuera del contenido
+  window.onclick = function (event) {
+    const modal = document.getElementById('modalDetalle');
+    if (event.target === modal) {
+      cerrarModal();
+    }
+  }
+
+  //Buscar nombre 
+  const inputBusqueda = document.getElementById('busqueda');
+  const tabla = document.getElementById('tablaHistorial').getElementsByTagName('tbody')[0];
+
+  inputBusqueda.addEventListener('input', () => {
+    const filtro = inputBusqueda.value.toLowerCase();
+    const filas = tabla.getElementsByTagName('tr');
+
+    for (let i = 0; i < filas.length; i++) {
+      const celdaNombre = filas[i].getElementsByTagName('td')[1]; // Columna de nombre del paciente
+      if (celdaNombre) {
+        const textoNombre = celdaNombre.textContent.toLowerCase();
+        filas[i].style.display = textoNombre.includes(filtro) ? '' : 'none';
+      }
+    }
+  });
+
+  function generarReporte() {
+    const paciente = document.getElementById('detallePaciente').textContent;
+    const medico = document.getElementById('detalleMedico').textContent;
+    window.location.href = `reporte.html?paciente=${encodeURIComponent(paciente)}&medico=${encodeURIComponent(medico)}`;
+  }
+
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Medicamentos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .medicamento-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .medicamento-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .stock-bajo {
+            color: #dc3545;
+        }
+
+        .stock-ok {
+            color: #198754;
+        }
+
+        .modal-content {
+            border-radius: 10px;
+        }
+
+        .btn-action {
+            margin: 0 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-4">
+        <h1 class="mb-4">Gestión de Medicamentos</h1>
+
+        <!-- Botón para agregar nuevo medicamento -->
+        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalMedicamento">
+            <i class="bi bi-plus-circle"></i> Nuevo Medicamento
+        </button>
+
+        <!-- Filtros -->
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <input type="text" id="buscarMedicamento" class="form-control" placeholder="Buscar medicamento...">
+            </div>
+            <div class="col-md-4">
+                <select id="filtroEstado" class="form-select">
+                    <option value="todos">Todos los estados</option>
+                    <option value="activo">Activos</option>
+                    <option value="inactivo">Inactivos</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Lista de medicamentos -->
+        <div id="listaMedicamentos" class="row">
+            <!-- Los medicamentos se cargarán aquí dinámicamente -->
+        </div>
+    </div>
+
+    <!-- Modal para agregar/editar medicamento -->
+    <div class="modal fade" id="modalMedicamento" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="registro-medicamento" method="POST" action="/guardar-medicamento">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalTitulo">Nuevo Medicamento</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="medicamentoId">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" class="form-control" name="nombre" id="nombre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Cantidad Disponible</label>
+                            <input type="number" class="form-control" name="cantidadDisponible" id="cantidadDisponible"
+                                min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Cantidad Mínima</label>
+                            <input type="number" class="form-control" name="cantidadMinima" id="cantidadMinima" min="0"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Unidad de Medida</label>
+                            <input type="text" class="form-control" name="unidadMedida" id="unidadMedida" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="btnGuardar">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Función para mostrar el modal de medicamento
+        function mostrarModal(item) {
+            document.getElementById('nombre').value = item.NOMBRE;
+            document.getElementById('cantidadDisponible').value = item.CANTIDAD_DISPONIBLE;
+            document.getElementById('cantidadMinima').value = item.CANTIDAD_MINIMA;
+            document.getElementById('unidadMedida').value = item.UNIDAD_MEDIDA;
+
+            document.getElementById('modalMedicamento').style.display = 'flex';
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('registro-medicamento');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                try {
+                    const formData = new FormData(form);
+                    const medicamentoData = {
+                        nombre: formData.get('nombre'),
+                        cantidadDisponible: formData.get('cantidadDisponible'),
+                        cantidadMinima: formData.get('cantidadMinima'),
+                        unidadMedida: formData.get('unidadMedida')
+                    };
+
+                    // Validación básica
+                    if (!medicamentoData.nombre || !medicamentoData.unidadMedida) {
+                        throw new Error('Por favor complete todos los campos requeridos');
+                    }
+
+                    const response = await fetch('/guardar-medicamento', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(medicamentoData)
+                    });
+
+                    if (response.ok) {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('modalMedicamento'));
+                        modal.hide();
+
+                        Swal.fire({
+                            title: '¡Éxito!',
+                            text: 'El medicamento se ha guardado correctamente',
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.reload();
+                            }
+                        });
+                    } else {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Error al guardar el medicamento');
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: error.message || 'Ha ocurrido un error al guardar el medicamento. Por favor, intente nuevamente.',
+                        icon: 'error',
+                        confirmButtonText: 'Entendido'
+                    });
+                }
+            });
+        });
+
+        async function cargarMedicamentos() {
+            try {
+                const response = await fetch('/medicamentos');
+                const medicamentos = await response.json();
+
+                const contenedor = document.getElementById('listaMedicamentos');
+                contenedor.innerHTML = ''; // Limpiar el contenedor
+
+                medicamentos.forEach(medicamento => {
+                    const card = `
+                    <div class="col-md-4 mb-3">
+                        <div class="medicamento-card">
+                            <h5>${medicamento.nombre}</h5>
+                            <p>Cantidad Disponible:${medicamento.cantidad_disponible} </p>
+                            <p>Cantidad Mínima: ${medicamento.cantidad_minima}</p>
+                            <p>Unidad de Medica:${medicamento.unidad_medida}</p>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-primary" onclick="editarMedicamento(${medicamento.id})">
+                                    <i class="bi bi-pencil"></i> Editar
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="eliminarMedicamento(${medicamento.id})">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                    contenedor.innerHTML += card;
+                });
+            } catch (error) {
+                console.error('Error al cargar medicamentos:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudieron cargar los medicamentos',
+                    icon: 'error'
+                });
+            }
+        }
+
+        async function editarMedicamento(id) {
+            try {
+                // Obtener los datos del medicamento
+                const response = await fetch(`/medicamentos/${id}`);
+                const medicamento = await response.json();
+
+                // Llenar el formulario con los datos
+                document.getElementById('medicamentoId').value = medicamento.id;
+                document.getElementById('nombre').value = medicamento.nombre;
+                document.getElementById('cantidadDisponible').value = medicamento.cantidad_disponible;
+                document.getElementById('cantidadMinima').value = medicamento.cantidad_minima;
+                document.getElementById('unidadMedida').value = medicamento.unidad_medida;
+
+                // Mostrar el modal
+                const modal = new bootstrap.Modal(document.getElementById('modalMedicamento'));
+                modal.show();
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo cargar el medicamento',
+                    icon: 'error'
+                });
+            }
+
+            document.getElementById('registro-medicamento').addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                try {
+                    const formData = new FormData(e.target);
+                    const medicamentoId = document.getElementById('medicamentoId').value;
+
+                    const data = {
+                        nombre: formData.get('nombre'),
+                        cantidad_disponible: formData.get('cantidadDisponible'),
+                        cantidad_minima: formData.get('cantidadMinima'),
+                        unidad_medida: formData.get('unidadMedida')
+                    };
+
+                    const url = medicamentoId ?
+                        `/actualizar-medicamento/${medicamentoId}` :
+                        '/guardar-medicamento';
+
+                    const method = medicamentoId ? 'PUT' : 'POST';
+
+                    const response = await fetch(url, {
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (response.ok) {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('modalMedicamento'));
+                        modal.hide();
+
+                        Swal.fire({
+                            title: '¡Éxito!',
+                            text: `Medicamento ${medicamentoId ? 'actualizado' : 'guardado'} correctamente`,
+                            icon: 'success'
+                        }).then(() => {
+                            cargarMedicamentos(); // Recargar la lista
+                        });
+                    } else {
+                        throw new Error('Error al guardar el medicamento');
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: error.message,
+                        icon: 'error'
+                    });
+                }
+            });
+        }
+
+        async function eliminarMedicamento(id) {
+            try {
+                const result = await Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: "Esta acción no se puede deshacer",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                });
+
+                if (result.isConfirmed) {
+                    const response = await fetch(`/eliminar-medicamento/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        Swal.fire({
+                            title: '¡Eliminado!',
+                            text: 'El medicamento ha sido eliminado',
+                            icon: 'success'
+                        });
+                        cargarMedicamentos(); // Recargar la lista
+                    } else {
+                        throw new Error('Error al eliminar');
+                    }
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo eliminar el medicamento',
+                    icon: 'error'
+                });
+            }
+        }
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarMedicamentos();
+        });
+    </script>
+</body>
+
+</html>

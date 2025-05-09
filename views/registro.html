@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Centro Gerontológico</title>
+    <link rel="stylesheet" href="assets/css/registro.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+</head>
+<body>
+    <div class="registro-container">
+        <div class="registro-card">
+            <div class="registro-header">
+                <h1><i class="bi bi-person-plus"></i> Registrar Paciente</h1>
+                <p class="subtitle">Realizar formulario para el paciente</p>
+            </div>
+
+            <form id="registroForm" action="/registrar" method="POST" class="registro-form">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="nombre"><i class="bi bi-person"></i> Nombre</label>
+                        <input type="text" id="nombre" name="nombre" required placeholder="Ingrese su nombre" />
+                    </div>
+
+                    <div class="input-group">
+                        <label for="apellido"><i class="bi bi-person"></i> Apellido</label>
+                        <input type="text" id="apellido" name="apellido" required placeholder="Ingrese su apellido" />
+                    </div>
+
+                    <div class="input-group">
+                        <label for="edad"><i class="bi bi-calendar"></i> Edad</label>
+                        <input type="number" id="edad" name="edad" required placeholder="Ingrese su edad" />
+                    </div>
+
+                    <div class="input-group">
+                        <label for="telefono"><i class="bi bi-telephone"></i> Teléfono</label>
+                        <input type="tel" id="telefono" name="telefono" required placeholder="Ingrese su teléfono" />
+                    </div>
+
+                    <div class="input-group">
+                        <label for="identificacion"><i class="bi bi-card-text"></i> Identificación</label>
+                        <input type="text" id="identificacion" name="identificacion" required placeholder="Ingrese su identificación" />
+                    </div>
+
+                    <div class="input-group">
+                        <label for="genero"><i class="bi bi-gender-ambiguous"></i> Género</label>
+                        <select id="genero" name="genero" required>
+                            <option value="">Seleccione su género</option>
+                            <option value="Masculino">Masculino</option>
+                            <option value="Femenino">Femenino</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="fecha_nacimiento"><i class="bi bi-calendar-heart"></i> Fecha de Nacimiento</label>
+                        <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" required />
+                    </div>
+
+                    <div class="input-group">
+                        <label for="estado_civil"><i class="bi bi-heart"></i> Estado Civil</label>
+                        <select id="estado_civil" name="estado_civil" required>
+                            <option value="">Seleccione su estado civil</option>
+                            <option value="Soltero">Soltero</option>
+                            <option value="Casado">Casado</option>
+                            <option value="Divorciado">Divorciado</option>
+                            <option value="Viudo">Viudo</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label for="direccion"><i class="bi bi-geo-alt"></i> Dirección</label>
+                        <input type="text" id="direccion" name="direccion" required placeholder="Ingrese su dirección completa" />
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label for="tipo_usuario"><i class="bi bi-person-badge"></i> Tipo de Usuario</label>
+                        <select id="tipo_usuario" name="tipo_usuario" required>
+                            <option value="">Seleccione el tipo de usuario</option>
+                            <option value="Paciente">Paciente</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn-registrar">
+                        <i class="bi bi-check-circle"></i> Registrarse
+                    </button>
+                    <a href="index.html" class="btn-volver">
+                        <i class="bi bi-arrow-left"></i> Volver al Inicio
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Verificar si el usuario está autenticados y que carga el formularios
+      window.addEventListener('DOMContentLoaded', () => {
+          const usuario = localStorage.getItem('usuarioNombre');
+          if (!usuario) {
+              Swal.fire({
+                  title: 'Acceso denegado',
+                  text: 'Debes iniciar sesión para acceder a esta página',
+                  icon: 'warning',
+                  confirmButtonText: 'Ir al login'
+              }).then((result) => {
+                  if (result.isConfirmed) {
+                      window.location.href = "login.html";
+                  }
+              });
+          }
+
+          // Validación del formulario
+          const form = document.getElementById('registroForm');
+          form.addEventListener('submit', async (e) => {
+              e.preventDefault();
+
+              // Validar campos vacíos
+              const campos = form.querySelectorAll('input, select');
+              let camposVacios = [];
+              
+              campos.forEach(campo => {
+                  if (!campo.value.trim()) {
+                      camposVacios.push(campo.previousElementSibling.textContent.trim());
+                  }
+              });
+
+              if (camposVacios.length > 0) {
+                  Swal.fire({
+                      title: 'Error',
+                      html: `Por favor complete los siguientes campos:<br>${camposVacios.join('<br>')}`,
+                      icon: 'error',
+                      confirmButtonText: 'Entendido'
+                  });
+                  return;
+              }
+
+              try {
+                  const formData = new FormData(form);
+                  const response = await fetch('/registrar', {
+                      method: 'POST',
+                      body: formData
+                  });
+
+                  if (response.ok) {
+                      Swal.fire({
+                          title: '¡Éxito!',
+                          text: 'El registro se ha completado correctamente',
+                          icon: 'success',
+                          confirmButtonText: 'Aceptar'
+                      }).then((result) => {
+                          if (result.isConfirmed) {
+                              window.location.href = "index.html";
+                          }
+                      });
+                  } else {
+                      throw new Error('Error al registrar');
+                  }
+              } catch (error) {
+                  Swal.fire({
+                      title: 'Error',
+                      text: 'Ha ocurrido un error al registrar. Por favor, intente nuevamente.',
+                      icon: 'error',
+                      confirmButtonText: 'Entendido'
+                  });
+              }
+          });
+      });
+  </script>
+</body>
+</html>
