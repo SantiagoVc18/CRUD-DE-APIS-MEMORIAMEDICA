@@ -17,31 +17,31 @@
                 <p class="subtitle">Realizar formulario para el paciente</p>
             </div>
 
-            <form id="registroForm" action="/registrar" method="POST" class="registro-form">
+            <form id="registroForm"  class="registro-form">
                 <div class="form-grid">
                     <div class="input-group">
                         <label for="nombre"><i class="bi bi-person"></i> Nombre</label>
-                        <input type="text" id="nombre" name="nombre" required placeholder="Ingrese su nombre" />
+                        <input type="text" id="nombre" name="nombre" required placeholder="Ingrese su nombre" minlength="2" maxlength="50" />
                     </div>
 
                     <div class="input-group">
                         <label for="apellido"><i class="bi bi-person"></i> Apellido</label>
-                        <input type="text" id="apellido" name="apellido" required placeholder="Ingrese su apellido" />
+                        <input type="text" id="apellido" name="apellido" required placeholder="Ingrese su apellido" minlength="2" maxlength="50" />
                     </div>
 
                     <div class="input-group">
                         <label for="edad"><i class="bi bi-calendar"></i> Edad</label>
-                        <input type="number" id="edad" name="edad" required placeholder="Ingrese su edad" />
+                        <input type="number" id="edad" name="edad" required placeholder="Ingrese su edad" min="1" max="120" />
                     </div>
 
                     <div class="input-group">
                         <label for="telefono"><i class="bi bi-telephone"></i> Teléfono</label>
-                        <input type="tel" id="telefono" name="telefono" required placeholder="Ingrese su teléfono" />
+                        <input type="tel" id="telefono" name="telefono" required placeholder="Ingrese su teléfono" pattern="[0-9]{10}" />
                     </div>
 
                     <div class="input-group">
                         <label for="identificacion"><i class="bi bi-card-text"></i> Identificación</label>
-                        <input type="text" id="identificacion" name="identificacion" required placeholder="Ingrese su identificación" />
+                        <input type="text" id="identificacion" name="identificacion" required placeholder="Ingrese su identificación" minlength="5" maxlength="20" />
                     </div>
 
                     <div class="input-group">
@@ -72,7 +72,7 @@
 
                     <div class="input-group full-width">
                         <label for="direccion"><i class="bi bi-geo-alt"></i> Dirección</label>
-                        <input type="text" id="direccion" name="direccion" required placeholder="Ingrese su dirección completa" />
+                        <input type="text" id="direccion" name="direccion" required placeholder="Ingrese su dirección completa" minlength="5" maxlength="200" />
                     </div>
 
                     <div class="input-group full-width">
@@ -96,79 +96,6 @@
         </div>
     </div>
 
-    <script>
-        // Verificar si el usuario está autenticados y que carga el formularios
-      window.addEventListener('DOMContentLoaded', () => {
-          const usuario = localStorage.getItem('usuarioNombre');
-          if (!usuario) {
-              Swal.fire({
-                  title: 'Acceso denegado',
-                  text: 'Debes iniciar sesión para acceder a esta página',
-                  icon: 'warning',
-                  confirmButtonText: 'Ir al login'
-              }).then((result) => {
-                  if (result.isConfirmed) {
-                      window.location.href = "login.html";
-                  }
-              });
-          }
-
-          // Validación del formulario
-          const form = document.getElementById('registroForm');
-          form.addEventListener('submit', async (e) => {
-              e.preventDefault();
-
-              // Validar campos vacíos
-              const campos = form.querySelectorAll('input, select');
-              let camposVacios = [];
-              
-              campos.forEach(campo => {
-                  if (!campo.value.trim()) {
-                      camposVacios.push(campo.previousElementSibling.textContent.trim());
-                  }
-              });
-
-              if (camposVacios.length > 0) {
-                  Swal.fire({
-                      title: 'Error',
-                      html: `Por favor complete los siguientes campos:<br>${camposVacios.join('<br>')}`,
-                      icon: 'error',
-                      confirmButtonText: 'Entendido'
-                  });
-                  return;
-              }
-
-              try {
-                  const formData = new FormData(form);
-                  const response = await fetch('/registrar', {
-                      method: 'POST',
-                      body: formData
-                  });
-
-                  if (response.ok) {
-                      Swal.fire({
-                          title: '¡Éxito!',
-                          text: 'El registro se ha completado correctamente',
-                          icon: 'success',
-                          confirmButtonText: 'Aceptar'
-                      }).then((result) => {
-                          if (result.isConfirmed) {
-                              window.location.href = "index.html";
-                          }
-                      });
-                  } else {
-                      throw new Error('Error al registrar');
-                  }
-              } catch (error) {
-                  Swal.fire({
-                      title: 'Error',
-                      text: 'Ha ocurrido un error al registrar. Por favor, intente nuevamente.',
-                      icon: 'error',
-                      confirmButtonText: 'Entendido'
-                  });
-              }
-          });
-      });
-  </script>
+    <script src="assets/js/registro.js"></script>
 </body>
 </html>

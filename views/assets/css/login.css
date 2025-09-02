@@ -15,7 +15,8 @@ body {
 
 .login-left {
   flex: 1;
-  background: linear-gradient(135deg, #1565c0, #0d47a1);
+  background: url('../img/Imagen.jpg') no-repeat center center;
+  background-size: cover;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -23,6 +24,24 @@ body {
   padding: 40px;
   color: white;
   text-align: center;
+  position: relative;
+}
+
+.login-left::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.login-left h1,
+.login-left p {
+  position: relative;
+  z-index: 2;
 }
 
 .login-left h1 {

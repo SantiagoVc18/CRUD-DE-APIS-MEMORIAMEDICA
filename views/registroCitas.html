@@ -17,26 +17,34 @@
                 <p class="subtitle">Complete el formulario para registrar una nueva cita</p>
             </div>
 
-            <form id="citaForm" action="/registrar-cita" method="POST" class="cita-form">
+            <form id="citaForm" class="cita-form">
                 <div class="form-grid">
                     <div class="input-group">
                         <label for="nombre_paciente"><i class="bi bi-person"></i> Nombre del Paciente</label>
-                        <input type="text" id="nombre_paciente" name="nombre_paciente" required placeholder="Ingrese el nombre completo del paciente" />
+                        <input type="text" id="nombre_paciente" name="nombre_paciente" required 
+                               placeholder="Ingrese el nombre completo del paciente" 
+                               pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+" 
+                               title="Solo se permiten letras y espacios" />
                     </div>
 
                     <div class="input-group">
                         <label for="nombre_medico"><i class="bi bi-person-badge"></i> Nombre del Médico</label>
-                        <input type="text" id="nombre_medico" name="nombre_medico" required placeholder="Ingrese el nombre del médico" />
+                        <input type="text" id="nombre_medico" name="nombre_medico" required 
+                               placeholder="Ingrese el nombre del médico" 
+                               pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+" 
+                               title="Solo se permiten letras y espacios" />
                     </div>
 
                     <div class="input-group">
                         <label for="fecha"><i class="bi bi-calendar-date"></i> Fecha de la Cita</label>
-                        <input type="date" id="fecha" name="fecha" required />
+                        <input type="date" id="fecha" name="fecha" required 
+                               min="<?php echo date('Y-m-d'); ?>" />
                     </div>
 
                     <div class="input-group">
                         <label for="hora"><i class="bi bi-clock"></i> Hora de la Cita</label>
-                        <input type="time" id="hora" name="hora" step="60" required />
+                        <input type="time" id="hora" name="hora" required 
+                               min="08:00" max="17:00" step="1800" />
                     </div>
 
                     <div class="input-group">
@@ -51,7 +59,9 @@
 
                     <div class="input-group full-width">
                         <label for="motivo"><i class="bi bi-chat-square-text"></i> Motivo de la Consulta</label>
-                        <textarea id="motivo" name="motivo" required placeholder="Describa el motivo de la consulta"></textarea>
+                        <textarea id="motivo" name="motivo" required 
+                                  placeholder="Describa el motivo de la consulta"
+                                  minlength="10" maxlength="500"></textarea>
                     </div>
                 </div>
 
@@ -68,72 +78,7 @@
     </div>
 
     
-    <script>
-      // Verificar si el usuario ha iniciado sesión y cargar el formulario
-      window.addEventListener('DOMContentLoaded', () => {
-        const usuario = localStorage.getItem('usuarioNombre');
-        if (!usuario) {
-          alert("Debes iniciar sesión para acceder a esta página.");
-          window.location.href = "login.html";
-        }
-  
-        // Validación del formulario
-        const form = document.getElementById('citaForm');
-        form.addEventListener('submit', async (e) => {
-          e.preventDefault();
-  
-          // Validar campos vacíos
-          const campos = form.querySelectorAll('input, select, textarea');
-          let camposVacios = [];
-          
-          campos.forEach(campo => {
-            if (!campo.value.trim()) {
-              camposVacios.push(campo.previousElementSibling.textContent.trim());
-            }
-          });
-  
-          if (camposVacios.length > 0) {
-            Swal.fire({
-              title: 'Error',
-              html: `Por favor complete los siguientes campos:<br>${camposVacios.join('<br>')}`,
-              icon: 'error',
-              confirmButtonText: 'Entendido'
-            });
-            return;
-          }
-  
-          try {
-            const formData = new FormData(form);
-            const response = await fetch('/registrar-cita', {
-              method: 'POST',
-              body: formData
-            });
-  
-            if (response.ok) {
-              Swal.fire({
-                title: '¡Éxito!',
-                text: 'La cita se ha registrado correctamente',
-                icon: 'success',
-                confirmButtonText: 'Aceptar'
-              }).then((result) => {
-                if (result.isConfirmed) {
-                  window.location.href = "historialmedico.html";
-                }
-              });
-            } else {
-              throw new Error('Error al registrar la cita');
-            }
-          } catch (error) {
-            Swal.fire({
-              title: 'Error',
-              text: 'Ha ocurrido un error al registrar la cita. Por favor, intente nuevamente.',
-              icon: 'error',
-              confirmButtonText: 'Entendido'
-            });
-          }
-        });
-      });
-    </script>
+    <script src="assets/js/registroCitas.js"></script>
 </body>
 </html>
 

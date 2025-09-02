@@ -97,3 +97,34 @@ El código interactúa con varias tablas en la base de datos:
 ---
 
 Este código es ideal para gestionar un sistema médico básico con funcionalidades CRUD y autenticación.
+
+
+
+CRUD-DE-APIS-MEMORIAMEDICA/
+│
+├── backend/                     # Lógica del servidor y conexión a la base de datos
+│   ├── persistencia/            # Archivos relacionados con la base de datos
+│   │   └── db.js                # Configuración de la base de datos
+│   ├── routes/                  # Rutas de la API
+│   │   └── api.js               # Archivo de rutas para la API
+│   ├── controllers/             # Controladores para manejar la lógica de negocio
+│   │   └── medicamentos.js      # Controlador para medicamentos
+│   ├── models/                  # Modelos de datos (ORM o consultas SQL)
+│   │   └── medicamento.js       # Modelo para la tabla de medicamentos
+│   └── middlewares/             # Middlewares personalizados
+│       └── auth.js              # Middleware para autenticación
+│
+├── views/                       # Archivos HTML y recursos estáticos
+│   ├── historialmedico.html     # Página de historial médico
+│   ├── index.html               # Página principal
+│   ├── assets/                  # Recursos estáticos (CSS, JS, imágenes)
+│   │   ├── css/
+│   │   │   └── styles.css       # Estilos CSS
+│   │   ├── js/
+│   │   │   └── historialmedico.js # Lógica de historial médico
+│   │   └── images/              # Imágenes del proyecto
+│
+├── index.js                     # Archivo principal del servidor
+├── package.json                 # Dependencias del proyecto
+├── package-lock.json            # Bloqueo de dependencias
+└── README.md                    # Documentación del proyecto
